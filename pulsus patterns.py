@@ -1,9 +1,12 @@
-with open("disk 1.txt", "r") as f:
+with open("examples/disk 1.txt", "r") as f:
     notes = f.read()
 notes = notes.split("\n")
 for i in range(len(notes)): # get note data - position, time, hold, hold time (if a hold)
     temp = notes[i][1:-1].split(",")
-    notes[i] = [int(temp[0]),int(float(temp[1])*1000),bool(temp[2]),int(float(temp[3])*1000)]
+    try:
+        notes[i] = [int(temp[0]),int(float(temp[1])*1000),bool(temp[2]),int(float(temp[3])*1000)]
+    except:
+        print("Error parsing map file. Maybe there's a blank line somewhere?")
 
 strain_notes = []
 hand = True
@@ -47,13 +50,15 @@ start, end = min(note_times), max(note_times)
 section_strains = []
 section = []
 
+
+
 while start <= end: # section pass
     section = [x for x in note_times if (start <= x < start + 400)]
     current_strain = [0,0]
     for note in section:
         note_id = note_times.index(note)
         hand = notes[note_id][4]
-        current_strain[hand] += strain[note_id][hand]
+        current_strain[hand] += notes[note_id][hand]
     section_strains.append((current_strain[0]**1.25)+(current_strain[1]**1.25)**0.8)
     start += 400
 
