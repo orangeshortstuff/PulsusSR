@@ -1,10 +1,13 @@
-with open("examples/vulture.txt", "r") as f:
+map_file = input("choose the map ")
+with open(f"examples/{map_file}.txt", "r") as f:
     notes = f.read()
 notes = notes.split("\n")
 notes = [x for x in notes if x != ""] # remove trailing newline
+rate = float(input("rate? "))
+rate = min(max(rate, 0.5), 2)
 for i in range(len(notes)): # get note data - position, time, hold, hold time (if a hold)
     temp = notes[i][1:-1].split(",")
-    notes[i] = [int(temp[0]),int(float(temp[1])*1000),bool(temp[2]),int(float(temp[3])*1000)]
+    notes[i] = [int(temp[0]),int(float(temp[1])*(1000/rate)),bool(temp[2]),int(float(temp[3])*(1000/rate))]
 
 strain_notes = []
 hand = True
