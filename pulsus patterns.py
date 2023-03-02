@@ -1,4 +1,4 @@
-map_file = input("choose the map ")
+map_file = input("map? ")
 with open(f"examples/{map_file}.txt", "r") as f:
     notes = f.read()
 notes = notes.split("\n")
@@ -17,6 +17,7 @@ current_strain = [0,0]
 last_notes = [0,0]
 note_strain = 0
 map_length = 0
+max_holds = 0
 for i in range(len(notes)): # handing / strain pass - add pattern buffs later
     note = notes[i] # get current note
 
@@ -41,6 +42,7 @@ for i in range(len(notes)): # handing / strain pass - add pattern buffs later
     if note[2]: # hold
         hold_stack.append(note[1] + note[3])
         map_length = max((note[1] + note[3]), map_length)
+        max_holds = max(max_holds, len(hold_stack))
     else:
         map_length = max(note[1], map_length)
 
@@ -70,3 +72,5 @@ for i in range(len(section_strains)):
     section_strains[i] *= 0.92**i
 
 print((sum(section_strains)/20)**0.7)
+print(max_holds)
+input()
