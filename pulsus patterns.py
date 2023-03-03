@@ -18,6 +18,8 @@ last_notes = [0,0]
 note_strain = 0
 map_length = 0
 max_holds = 0
+streak = 0
+streak_multipliers = [0,1,0.8,1.05,1.2,1]
 for i in range(len(notes)): # handing / strain pass - add pattern buffs later
     note = notes[i] # get current note
 
@@ -26,21 +28,32 @@ for i in range(len(notes)): # handing / strain pass - add pattern buffs later
 
     if note[0]%3 == 0 and hand:
         hand = False # lh
+        streak = 0
     if note[0]%3 == 2 and not hand:
         hand = True # rh
-    
+        streak = 0
+
+    streak += 1
+
+    if streak > 4 and streak%2 == 1: # flip hands for 5th, 7th, etc
+        hand = not hand
+
     if i != 0:
         if notes[i-1][1] + 20 > note[1]: # chord detection, with a small chording window
-            current_strain[hand] = (0.5+current_strain[hand] / 1.5)
+            current_strain[hand] = (0.15 + current_strain[hand] / 1.5)
         else: # do strain right
+            vert_notes = [note[0]//3,notes[last_notes[hand]][0]//3]
             strain_exp[hand] = (note[1] - notes[last_notes[hand]][1]) / 1000
-            current_strain[hand] *= (0.33 ** strain_exp[hand])
-            current_strain[hand] += (5 + (len(hold_stack) * 2)) / 10
+            current_strain[hand] += (4 + (len(hold_stack) * 2)) * (streak_multipliers[min(streak,4)]) / (15 - abs(vert_notes[0] - vert_notes[1]))
+            current_strain[hand] *= (0.66 ** strain_exp[hand])
             last_notes[hand] = i
     note_strain = current_strain[hand]
-    
+
+    if streak > 4 and streak%2 == 1:
+        hand = not hand
+ 
     if note[2] == True: # hold
-        hold_stack.append(int(note[1]) + int(note[3]))
+        hold_stack.append(note[1] + note[3])
         map_length = max(hold_stack[-1], map_length)
     else:
         map_length = max(note[1], map_length)
@@ -67,7 +80,8 @@ while start <= map_length: # section pass
 section_strains.sort(reverse=True)
 section_strains = [x for x in section_strains if x > 0]
 for i in range(len(section_strains)):
-    section_strains[i] *= 0.92**i
+    section_strains[i] /= (4+i)
 
-print((sum(section_strains)/14)**0.625)
-input()
+print(sum(section_strains))
+#print(max(sum(section_strains)**0.5)-0.1),0)
+#input()
