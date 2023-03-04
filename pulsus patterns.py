@@ -20,6 +20,9 @@ map_length = 0
 max_holds = 0
 streak = 0
 streak_multipliers = [0,0.9,0.8,1.05,1.2,0.9]
+meta_streaks = [0,0]
+last_streaks = [0,0]
+
 for i in range(len(notes)): # handing / strain pass - add pattern buffs later
     note = notes[i] # get current note
 
@@ -27,9 +30,26 @@ for i in range(len(notes)): # handing / strain pass - add pattern buffs later
     hold_stack = [x for x in hold_stack if x > note[1]]
 
     if note[0]%3 == 0 and hand:
+        if streak == last_streaks[hand]:
+            meta_streaks[hand] += 1
+            for i in range(streak):
+                strain_notes[-1 - streak] *= 0.92 ** min(meta_streaks[hand],3)
+        else:
+            meta_streaks[hand] = 0
+        last_streaks[hand] = streak
+        
         hand = False # lh
         streak = 0
     if note[0]%3 == 2 and not hand:
+
+        if streak == last_streaks[hand]:
+            meta_streaks[hand] += 1
+            for i in range(streak):
+                strain_notes[-1 - streak] *= 0.92 ** min(meta_streaks[hand],3)
+        else:
+            meta_streaks[hand] = 0
+        last_streaks[hand] = streak
+
         hand = True # rh
         streak = 0
 
@@ -59,31 +79,28 @@ for i in range(len(notes)): # handing / strain pass - add pattern buffs later
         map_length = max(note[1], map_length)
 
     strain_notes.append(note_strain)
-    notes[i].append(hand)
 
 note_times = [note[1] for note in notes]
-note_hands = [note[4] for note in notes]
 start = min(note_times)
 section_strains = []
 section = []
 
 while start <= map_length: # section pass
     section = [x for x in note_times if (start <= x < start + 400)]
-    current_strain = [0,0]
+    current_strain = 0
     for note in section:
         note_id = note_times.index(note)
-        hand = notes[note_id][4]
-        current_strain[hand] += strain_notes[note_id]
-    section_strains.append((current_strain[0])+(current_strain[1]))
+        current_strain += strain_notes[note_id]
+    section_strains.append(current_strain)
     start += 400
 
 section_strains.sort(reverse=True)
 section_strains = [x for x in section_strains if x > 0]
 for i in range(len(section_strains)):
-    section_strains[i] *= (0.92**i) # old method - may end up replacing with some form of commented line
+    section_strains[i] *= (0.92**i) # old method - may end up replacing with some form of line below
     #section_strains[i] /= (4+i)
 
 #print(max(section_strains))
 #print(sum(section_strains))
-print(((sum(section_strains)/7.5)**0.54))
+print(((sum(section_strains)/5.2)**0.54))
 input()
