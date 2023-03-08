@@ -23,38 +23,28 @@ streak_multipliers = [0,0.9,0.8,1.05,1.2,0.9]
 meta_streaks = [0,0]
 last_streaks = [0,0]
 
-for i in range(len(notes)): # handing / strain pass - add pattern buffs later
-    note = notes[i] # get current note
+for i in range(len(notes)): # handing / strain / pattern pass
+    note = notes[i]
 
     # check and remove holds that have been released
     hold_stack = [x for x in hold_stack if x > note[1]]
 
-    if note[0]%3 == 0 and hand:
+    if (note[0]%3 == 0 and hand) or (note[0]%3 == 2 and not hand):
+        
         if streak == last_streaks[hand]:
             meta_streaks[hand] += 1
-            for i in range(streak):
-                strain_notes[-1 - streak] *= 0.92 ** min(meta_streaks[hand],3)
+            strain_notes, this_streak = strain_notes[:(streak * -1)], strain_notes[(streak * -1):]
+            this_streak = [x * (0.92 ** meta_streaks[hand]) for x in this_streak]
+            strain_notes += this_streak
+            current_strain[hand] *= 0.92 ** meta_streaks[hand]
         else:
             meta_streaks[hand] = 0
         last_streaks[hand] = streak
         
-        hand = False # lh
-        streak = 0
-    if note[0]%3 == 2 and not hand:
-
-        if streak == last_streaks[hand]:
-            meta_streaks[hand] += 1
-            for i in range(streak):
-                strain_notes[-1 - streak] *= 0.92 ** min(meta_streaks[hand],3)
-        else:
-            meta_streaks[hand] = 0
-        last_streaks[hand] = streak
-
-        hand = True # rh
+        hand = not hand
         streak = 0
 
     streak += 1
-
     if streak > 4 and streak%2 == 1: # flip hands for 5th, 7th, etc
         hand = not hand
 
@@ -102,5 +92,5 @@ for i in range(len(section_strains)):
 
 #print(max(section_strains))
 #print(sum(section_strains))
-print(((sum(section_strains)/5.2)**0.54))
+print(((sum(section_strains)/5.8)**0.52))
 input()
