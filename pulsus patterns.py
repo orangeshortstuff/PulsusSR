@@ -34,6 +34,7 @@ for i in range(len(streaks)):
     if streaks[i] > 4: # convert to full alt
         for j in range(streak_total[i]+1,streak_total[i]+streaks[i],2):
             hands[j] = not hands[j]
+
 streak = 0
 streaks = []
 streak_total = [0]
@@ -49,7 +50,7 @@ if streak >= 1:
     streaks.append(streak)
 
 
-streak_multipliers = [0,1,0.9,1.1,1.2,1]
+streak_multipliers = [0,1,0.85,1.15,1.3,1]
 note_multipliers = []
 hand = bool(first_hand)
 meta_streaks = [[0 for i in range(5)],[0 for i in range(5)]]
@@ -94,6 +95,7 @@ for i in range(len(notes)): # strain pass
     if i != 0:
         if notes[i-1][1] + 20 > note[1]: # chord detection, with a small chording window
             note_strain = (0.15 + current_strain[hand] / 1.2)
+            last_notes[hand] = i
         else: # do strain right
             note_strain = current_strain[hand]
             vert_notes = [note[0]//3,notes[last_notes[hand]][0]//3]
@@ -119,5 +121,11 @@ for i in range(len(section_strains)):
     section_strains[i] /= (4+i)
 
 #print(sum(section_strains))
-print(((sum(section_strains)/1.7)**0.45))
+#"""
+star_rating = (sum(section_strains)/2.4)**0.49
+max_pulse = (((star_rating**2.1)*(7/2))**(1/1.1) + ((star_rating**2.5)*(2))**(1/1.1)) ** 1.1
+max_pulse *= 0.8+(( (len(notes) / (1+(star_rating**(1/3))) )**0.5)/100)
+print(star_rating)
+print(max_pulse)
+#"""
 input()
