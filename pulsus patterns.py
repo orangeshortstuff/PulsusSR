@@ -100,7 +100,7 @@ for i in range(len(notes)): # strain pass
             note_strain = current_strain[hand]
             vert_notes = [note[0]//3,notes[last_notes[hand]][0]//3]
             strain_exp[hand] = (note[1] - notes[last_notes[hand]][1]) / 1000
-            current_strain[hand] += note_multipliers[i] * (4 + (len(hold_stack) * 2)) \
+            current_strain[hand] += note_multipliers[i] * (4 + (5*len(hold_stack)) + (2*note[2])) \
                                     / ((15 + current_strain[hand]) - abs(vert_notes[0] - vert_notes[1]))
             current_strain[hand] *= (0.66 ** strain_exp[hand])
             last_notes[hand] = i
@@ -123,7 +123,9 @@ for i in range(len(section_strains)):
 #print(sum(section_strains))
 #"""
 star_rating = (sum(section_strains)/2.4)**0.49
-max_pulse = (((star_rating**2.1)*(7/2))**(1/1.1) + ((star_rating**2.5)*(2))**(1/1.1)) ** 1.1
+diff_pulse = (star_rating**2.1)*7/2
+acc_pulse = (star_rating**2.5)*2
+max_pulse = ( (diff_pulse**(1/1.1)) + (acc_pulse**(1/1.1)) ) ** 1.1
 max_pulse *= 0.8+(( (len(notes) / (1+(star_rating**(1/3))) )**0.5)/100)
 print(star_rating)
 print(max_pulse)
