@@ -120,16 +120,15 @@ section_strains.sort(reverse=True)
 section_strains = [x for x in section_strains if x > 0]
 
 for i in range(len(section_strains)):
-    section_strains[i] /= (4+i)
+    section_strains[i] /= (1.5+i)
 
 
 #print(sum(section_strains))
 #"""
-star_rating = ((sum(section_strains)+0.2)/1.7)**0.88
+star_rating = ((sum(section_strains)+0.2))/2.77
 diff_pulse = (star_rating**2.1)*7/2
 acc_pulse = (star_rating**2.5)*2
-max_pulse = ( (diff_pulse**(1/1.1)) + (acc_pulse**(1/1.1)) ) ** 1.1
-max_pulse *= 0.8+(( (len(notes) / (1+(star_rating**(1/3))) )**0.5)/100)
+max_pulse = (( (diff_pulse**(1/1.1)) + (acc_pulse**(1/1.1)) ) ** 1.1)*1.15
 print(star_rating)
 print(max_pulse)
 #"""
