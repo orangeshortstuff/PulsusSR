@@ -94,16 +94,16 @@ for i in range(len(notes)): # strain pass
         section_start += (400/rate)
     
     if i != 0:
-        if notes[i-1][1] + 20 > note[1]: # chord detection, with a small chording window
-            note_strain = note_multipliers[i] * (0.15 + current_strain[hand] / 1.5)
-            current_strain[hand] += note_multipliers[i] * (1 / (12 + (3*current_strain[hand])))
+        note_strain = current_strain[hand]
+        strain_exp[hand] = (note[1] - notes[last_notes[hand]][1]) / 1000
+        vert_diff = abs((note[0]//3)-(notes[last_notes[hand]][0]//3))
+        vert_mul = 1+(vert_diff/(6+(strain_exp[hand]/20)))
+        if notes[i-1][1] + 10 > note[1]: # chord detection, with a small chording window
+            current_strain[hand] += note_multipliers[i] * vert_mul * (1 / (12 + (3*current_strain[hand])))
         else: # do strain right
-            note_strain = current_strain[hand]
-            vert_notes = [note[0]//3,notes[last_notes[hand]][0]//3]
-            strain_exp[hand] = (note[1] - notes[last_notes[hand]][1]) / 1000
-            current_strain[hand] += note_multipliers[i] * (4 + (2*len(hold_stack)) + (note[2])) \
-                                    / ((15 + (3*current_strain[hand])) - abs(vert_notes[0] - vert_notes[1]))
-            current_strain[hand] *= (0.66 ** strain_exp[hand])
+            current_strain[hand] += note_multipliers[i] * vert_mul * \
+                                    (4 + (2*len(hold_stack)) + (note[2])) / (15 + (3*current_strain[hand]))
+        current_strain[hand] *= (0.66 ** strain_exp[hand])
         last_notes[hand] = i
     else:
         note_strain = current_strain[hand] 
@@ -112,9 +112,10 @@ for i in range(len(notes)): # strain pass
         hold_stack.append(note[1] + note[3])
 
     section.append(note_strain)
-section_strains.append(sum(section))
 
+section_strains.append(max(section))
 
+#print((section_strains.index(max(section_strains))*(400/rate))+notes[0][1])
 section_strains.sort(reverse=True)
 section_strains = [x for x in section_strains if x > 0]
 
@@ -124,7 +125,7 @@ for i in range(len(section_strains)):
 
 #print(sum(section_strains))
 #"""
-star_rating = ((sum(section_strains)+0.2)/2.6)**1.04
+star_rating = ((sum(section_strains)+0.2)/1.7)**0.88
 diff_pulse = (star_rating**2.1)*7/2
 acc_pulse = (star_rating**2.5)*2
 max_pulse = ( (diff_pulse**(1/1.1)) + (acc_pulse**(1/1.1)) ) ** 1.1
