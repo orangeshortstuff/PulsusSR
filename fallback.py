@@ -50,9 +50,7 @@ if streak >= 1:
     streaks.append(streak)
 
 
-#for i in range(1,6):
-#    print(i*len([x for x in streaks if x == i]))
-streak_multipliers = [0,1,0.77,1.2,1.2,1]
+streak_multipliers = [0,1,0.85,1.15,1.3,1]
 note_multipliers = []
 hand = bool(first_hand)
 meta_streaks = [[0 for i in range(5)],[0 for i in range(5)]]
@@ -74,7 +72,7 @@ for streak in streaks: # pattern multipliers
 
 
 #print(sum(note_multipliers)/len(note_multipliers))
-hold_stack = [[],[]]
+hold_stack = []
 strain_exp = [1,1]
 current_strain = [0,0]
 last_notes = [0,0]
@@ -88,7 +86,7 @@ for i in range(len(notes)): # strain pass
     hand = hands[i]
     
     # check and remove holds that have been released
-    hold_stack[hand] = [x for x in hold_stack[hand] if x > note[1]]
+    hold_stack = [x for x in hold_stack if x > note[1]]
     
     if note[1] >= section_start + (400/rate):
         section_strains.append(max(section))
@@ -97,25 +95,23 @@ for i in range(len(notes)): # strain pass
     
     if i != 0:
         note_strain = current_strain[hand]
-        dt = (note[1] - notes[i-1][1]) / 1000
         strain_exp[hand] = (note[1] - notes[last_notes[hand]][1]) / 1000
         vert_diff = abs((note[0]//3)-(notes[last_notes[hand]][0]//3))
-        vert_mul = 1+(vert_diff/((6+ (strain_exp[hand]) /20)))
+        vert_mul = 1+(vert_diff/(6+(strain_exp[hand]/20)))
         if notes[i-1][1] + 10 > note[1]: # chord detection, with a small chording window
             current_strain[hand] += note_multipliers[i] * vert_mul * (1 / (12 + (3*current_strain[hand])))
         else: # do strain right
             current_strain[hand] += note_multipliers[i] * vert_mul * \
-                                    (3 + (2*len(hold_stack[hand])) + (note[2])) / (15 + (3*current_strain[hand]))
-        current_strain[0] *= (0.6 ** dt)
-        current_strain[1] *= (0.6 ** dt)
+                                    (4 + (2*len(hold_stack)) + (note[2])) / (15 + (3*current_strain[hand]))
+        current_strain[hand] *= (0.66 ** strain_exp[hand])
         last_notes[hand] = i
     else:
         note_strain = current_strain[hand] 
  
     if note[2] == True: # hold
-        hold_stack[hand].append(note[1] + note[3])
+        hold_stack.append(note[1] + note[3])
 
-    section.append(current_strain[0]+current_strain[1])
+    section.append(note_strain)
 
 section_strains.append(max(section))
 
@@ -129,7 +125,7 @@ for i in range(len(section_strains)):
 
 #print(sum(section_strains))
 #"""
-star_rating = ((sum(section_strains)+0.2)**0.88)/2.3
+star_rating = ((sum(section_strains)+0.2))/2.77
 diff_pulse = (star_rating**2.1)*7/2
 acc_pulse = (star_rating**2.5)*2
 max_pulse = (( (diff_pulse**(1/1.1)) + (acc_pulse**(1/1.1)) ) ** 1.1)*1.15
