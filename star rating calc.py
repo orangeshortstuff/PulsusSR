@@ -105,7 +105,7 @@ for i in range(len(notes)): # strain pass
             current_strain[hand] += note_multipliers[i] * vert_mul * (1 / (12 + (3*current_strain[hand])))
         else: # do strain right
             current_strain[hand] += note_multipliers[i] * vert_mul * \
-                                    (3 + (2*len(hold_stack[hand])) + (note[2])) / (15 + (3*current_strain[hand]))
+                                    (3 + (5*len(hold_stack[hand])) + (note[2])) / (15 + (3*current_strain[hand]))
         current_strain[0] *= (0.6 ** dt)
         current_strain[1] *= (0.6 ** dt)
         last_notes[hand] = i
