@@ -33,7 +33,7 @@ if streak >= 1:
     streaks.append(streak)
 
 for i in range(len(streaks)):
-    if streaks[i] > 4: # convert to full alt
+    if streaks[i] > 3: # convert to full alt
         for j in range(streak_total[i]+1,streak_total[i]+streaks[i],2):
             hands[j] = not hands[j]
 
@@ -52,9 +52,9 @@ if streak >= 1:
     streaks.append(streak)
 
 
-#for i in range(1,6):
-#    print(i*len([x for x in streaks if x == i]))
-streak_multipliers = [0,1,0.77,1.2,1.2,1]
+for i in range(1,5):
+    print(i*len([x for x in streaks if x == i]))
+streak_multipliers = [0,1,0.77,1.2,1]
 note_multipliers = []
 hand = bool(first_hand)
 meta_streaks = [[0 for i in range(5)],[0 for i in range(5)]]
@@ -75,7 +75,7 @@ for streak in streaks: # pattern multipliers
     note_multipliers += [multiplier*streak_multipliers[streak]]*streak
 
 
-#print(sum(note_multipliers)/len(note_multipliers))
+print(sum(note_multipliers)/len(note_multipliers))
 hold_stack = [[],[]]
 strain_exp = [1,1]
 current_strain = [0,0]
@@ -106,12 +106,12 @@ for i in range(len(notes)): # strain pass
         vert_diff = abs((note[0]//3)-(notes[last_notes[hand]][0]//3))
         vert_mul = 1+(vert_diff/((6+ (strain_exp[hand]) /20)))
         if notes[i-1][1] + 10 > note[1]: # chord detection, with a small chording window
-            current_strain[hand] += note_multipliers[i] * vert_mul * (1 / (12 + (3*current_strain[hand])))
+            current_strain[hand] += note_multipliers[i] * vert_mul * ((1 + (len(hold_stack[hand])*2)) / (12 + (3*current_strain[hand])))
         else: # do strain right
-            current_strain[hand] += note_multipliers[i] * vert_mul * \
-                                    (3 + (5*len(hold_stack[hand])) + (note[2])) / (15 + (3*current_strain[hand]))
-        current_strain[0] *= (0.6 ** dt)
-        current_strain[1] *= (0.6 ** dt)
+            current_strain[hand] += note_multipliers[i] * vert_mul * (3 + (len(hold_stack[hand])**0.4 * 3) + note[2]) \
+                                    / (15 + (3*current_strain[hand]))
+        current_strain[0] *= (0.63 ** dt)
+        current_strain[1] *= (0.63 ** dt)
         last_notes[hand] = i
     else:
         note_strain = current_strain[hand] 
@@ -119,7 +119,7 @@ for i in range(len(notes)): # strain pass
     if note[2] == True: # hold
         hold_stack[hand].append(note[1] + note[3])
 
-    section.append(current_strain[0]+current_strain[1])
+    section.append((current_strain[hand]**1.2)+(current_strain[not hand]) ** (1/1.2))
 
 section_strains.append(max(section))
 graph_starts.append(section_start)
@@ -139,10 +139,10 @@ for i in range(len(section_strains)):
 
 #print(sum(section_strains))
 #"""
-star_rating = ((sum(section_strains)+0.2)**0.88)/2.3
-diff_pulse = (star_rating**2.1)*7/2
-acc_pulse = (star_rating**2.5)*2
-max_pulse = (( (diff_pulse**(1/1.1)) + (acc_pulse**(1/1.1)) ) ** 1.1)*1.15
+star_rating = ((sum(section_strains)+0.2)**0.83)/2.2
+diff_pulse = (star_rating**2.2)*5/2
+acc_pulse = (star_rating**2.7)*8/5
+max_pulse = (( (diff_pulse**(1/1.1)) + (acc_pulse**(1/1.1)) ) ** 1.1)
 print(star_rating)
 print(max_pulse)
 #"""
@@ -151,7 +151,7 @@ plt.figure()
 plt.title("Strain over time for {}".format(map_file))
 plt.xlabel("Section start (seconds)")
 plt.ylabel("Strain")
-plt.plot(graph_starts, graph_strains, '--', color="gray", label="Raw strain")
+#plt.plot(graph_starts, graph_strains, '--', color="gray", label="Raw strain")
 plt.plot(graph_starts, graph_strains_roll, color="blue", label="{}-term moving average".format(roll_amt*2+1))
 plt.legend()
 plt.show()
