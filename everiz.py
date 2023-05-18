@@ -55,7 +55,7 @@ if streak >= 1:
 
 #for i in range(1,6):
 #    print(i*len([x for x in streaks if x == i]))
-streak_multipliers = [0,1,0.77,1.2,1.1,1]
+streak_multipliers = [0,1,0.75,1.2,1.1,1]
 note_multipliers = []
 hand = bool(first_hand)
 meta_streaks = [[0 for i in range(5)],[0 for i in range(5)]]
@@ -148,12 +148,12 @@ section_strains.sort(reverse=True)
 section_strains = [x for x in section_strains if x > 0]
 
 for i in range(len(section_strains)):
-    section_strains[i] /= (4+(i ** 1.03))
+    section_strains[i] /= (2.5+(i ** 1.35))
 
 
 #print(sum(section_strains))
 #"""
-star_rating = ((sum(section_strains))**0.92) * 1.05
+star_rating = ((sum(section_strains))**0.94) * 1.84
 diff_pulse = (star_rating**2.1)*7/2
 acc_pulse = (star_rating**2.5)*2
 max_pulse = (( (diff_pulse**(1/1.1)) + (acc_pulse**(1/1.1)) ) ** 1.1)*1.15
