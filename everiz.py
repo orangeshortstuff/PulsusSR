@@ -55,7 +55,7 @@ if streak >= 1:
 
 #for i in range(1,6):
 #    print(i*len([x for x in streaks if x == i]))
-streak_multipliers = [0,1,0.75,1.2,1.1,1]
+streak_multipliers = [0,1,0.75,1.15,1.08,1]
 note_multipliers = []
 hand = bool(first_hand)
 meta_streaks = [[0 for i in range(5)],[0 for i in range(5)]]
@@ -97,35 +97,38 @@ for i in range(len(notes)): # strain pass
     # check and remove holds that have been released
     hold_stack[hand] = [x for x in hold_stack[hand] if x > note[1]]
     
-    if note[1] >= section_start + (400/rate):
-        section_strains.append(max(section))
+    if note[1] >= section_start + (400):
+        section_strains.append(sum(section) / len(section))
         graph_starts.append(section_start)
         section = []
-        section_start += (400/rate)
+        section_start += (400)
     
     if i != 0:
         note_strain = current_strain[hand]
         dt = (note[1] - notes[i-1][1])/1000
         strain_exp[hand] = (note[1] - notes[last_notes[hand]][1]) / 1000
         vert_diff = abs((note[0]//3)-(notes[last_notes[hand]][0]//3))
-        vert_mul = 1+(vert_diff/( 6+ ((strain_exp[hand] ** 1.35) /100)))
+        vert_mul = 1+(vert_diff/( 8 + ((strain_exp[hand] ** 1.35) / 80)))
 
         if notes[i-1][1] + 10 > note[1]: # chord detection, with a small chording window
-            current_strain[hand] += note_multipliers[i] * vert_mul * (1 / (12 + (3*current_strain[hand])))
+            current_strain[hand] += note_multipliers[i] * vert_mul * (2 + (5*len(hold_stack[hand])) + (note[2])) / (15)
         else: # do strain right
 
             if i > 1: # rhythm bonus
              rratio = (notes[i-1][1] - notes[i-2][1]) / (note[1] - notes[i-1][1])
-             rbonus = (-0.5 * cos(1*pi*rratio)**8)-(cos(2*pi*rratio)**8)-(0.5 * cos(3*pi*rratio)**8)-(cos(4*pi*rratio)**8)
+             rbonus = (-0.3 * cos(1*pi*rratio)**8)-(cos(2*pi*rratio)**8)-(0.5 * cos(3*pi*rratio)**8)-(cos(4*pi*rratio)**8)
              nerf = 1 + ((e**(e*-((rratio-1)**2)/(0.5**2))) - (2*e**(e*-((rratio-1)**2)/(0.125**2))))
-             rhythmbonus = ((rbonus+nerf)/16+1.25)
+             rhythmbonus = ((rbonus+nerf)/20+1.19)
 
             else:
                 rhythmbonus = 1
-            current_strain[hand] += note_multipliers[i] * vert_mul * rhythmbonus * (3 + (5*len(hold_stack[hand])) + (note[2])) / (15 + (3*current_strain[hand]))
+            current_strain[hand] += note_multipliers[i] * vert_mul * rhythmbonus * (3 + (5*len(hold_stack[hand])) + (note[2])) / (15)
 
-        current_strain[0] *= (0.5 ** ((1.2 * dt) ** 0.8))
-        current_strain[1] *= (0.5 ** ((1.2 * dt) ** 0.8))
+        if current_strain[0] > 0:
+            current_strain[0] = (1 / (dt + (1 / current_strain[0])))
+        if current_strain[1] > 0:
+            current_strain[1] = (1 / (dt + (1 / current_strain[1])))
+
         last_notes[hand] = i
     else:
         note_strain = current_strain[hand] 
@@ -133,7 +136,7 @@ for i in range(len(notes)): # strain pass
     if note[2] == True: # hold
         hold_stack[hand].append(note[1] + note[3])
 
-    section.append(((current_strain[0] ** 1.3) + (current_strain[1] ** 1.3)) ** (1/1.3))
+    section.append(((current_strain[0] ** 1.2) + (current_strain[1] ** 1.2)) ** (1/1.2))
 
 section_strains.append(sum(section) / len(section))
 graph_starts.append(section_start)
@@ -148,12 +151,12 @@ section_strains.sort(reverse=True)
 section_strains = [x for x in section_strains if x > 0]
 
 for i in range(len(section_strains)):
-    section_strains[i] /= (2.5+(i ** 1.35))
+    section_strains[i] /= (1.8+(i ** 1.4))
 
 
 #print(sum(section_strains))
 #"""
-star_rating = ((sum(section_strains))**0.94) * 1.84
+star_rating = ((sum(section_strains))**1.45) * 0.6
 diff_pulse = (star_rating**2.1)*7/2
 acc_pulse = (star_rating**2.5)*2
 max_pulse = (( (diff_pulse**(1/1.1)) + (acc_pulse**(1/1.1)) ) ** 1.1)*1.15
