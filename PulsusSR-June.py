@@ -7,7 +7,7 @@ with open(f"examples/{map_file}.txt", "r") as f:
 notes = notes.split("\n")
 notes = [x for x in notes if x != ""] # remove trailing newline
 rate = float(input("rate? "))
-rate = min(max(rate, 0.5), 2)
+rate = min(max(rate, 0.1), 2)
 for i in range(len(notes)): # get note data - position, time, hold, hold time (if a hold)
     temp = notes[i][1:-1].split(",")
     notes[i] = [int(temp[0]),int(float(temp[1])*(1000/rate)),(temp[2] == "1"),int(float(temp[3])*(1000/rate))]
