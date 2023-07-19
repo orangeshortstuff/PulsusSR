@@ -1,6 +1,6 @@
 import math
 
-matplot = False #True for on, False for off. Obviously. You don't need me telling you this wtf am I doing
+matplot = True #True for on, False for off. Obviously. You don't need me telling you this wtf am I doing
 
 map_file = input("map? ")
 with open(f"examples/{map_file}.txt", "r") as f:
@@ -27,6 +27,7 @@ prevMove = [[False,0,0],[False,0,0]] #If the nerf was just triggered, horiz, ver
 lastFin = [-1,-1]
 averageStrain = [0,0,0,0,0,0,0,0,0,0] #Gives a VERY slight bonus based on the general difficulty of previous sections. Used to buff long, difficult parts.
 strainBonus = 0
+decayFactor = 1.5
 holdInd = []
 finMap = []
 holdStack = [[],[]]
@@ -64,7 +65,10 @@ def Resection(a):
             section.append(0)
             graphFins.append([0,0,0,0])
         sectionStrains.append(sum(section) / len(section))
-        graphFinStrains.append([sum([x[0] for x in graphFins]) / len(graphFins), sum([x[1] for x in graphFins]) / len(graphFins), sum([x[2] for x in graphFins]) / len(graphFins), sum([x[3] for x in graphFins]) / len(graphFins)])
+        graphFinStrains.append([sum([x[0] for x in graphFins]) / len(graphFins),
+                                sum([x[1] for x in graphFins]) / len(graphFins),
+                                sum([x[2] for x in graphFins]) / len(graphFins),
+                                sum([x[3] for x in graphFins]) / len(graphFins)])
         del averageStrain[0]
         averageStrain.append(sum(section) / len(section))
         graphAverageStrain.append(sum(averageStrain) / len(averageStrain))
@@ -89,9 +93,9 @@ def Patterning(a):
 
     if a > 0:
         dt = (notes[a][1] - notes[a - 1][1]) / 1000
-        for b in range(4):
+        for b in range(4): # per finger decay
             if finStrain[(b % 2)][math.floor(b / 2)] > 0:
-                finStrain[(b % 2)][math.floor(b / 2)] = (1 / ((dt) + (1 / finStrain[(b % 2)][math.floor(b / 2)])))
+                finStrain[(b % 2)][math.floor(b / 2)] = (decayFactor / ((dt) + (decayFactor / finStrain[(b % 2)][math.floor(b / 2)])))
 
     if a > 1: #Rhythm bonus
         rratio = DivZero((notes[a-1][1] - notes[a-2][1]), (notes[a][1] - notes[a-1][1]))
@@ -190,7 +194,7 @@ sectionStrains = [x for x in sectionStrains if x > 0]
 for i in range(len(sectionStrains)):
     sectionStrains[i] /= (2 + (i ** 1.4))
 
-starRating = (sum(sectionStrains) ** 1.57) * 0.35
+starRating = (sum(sectionStrains) ** 1.36) * 0.38
 
 print(starRating)
 print(sum(sectionStrains))
