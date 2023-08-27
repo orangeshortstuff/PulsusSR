@@ -135,7 +135,7 @@ def Patterning(a):
             holdBonus = 1 + ((len(holdStackApp[currentHand]) ** 1.5) * 2.5)
 
             if (currentFin != lastFin[currentHand]) and (not rolled[currentHand]):
-                rollNerf = 0.5
+                rollNerf = 0.85*(1-(0.1**dt))+0.15
             else:
                 rollNerf = 1
 

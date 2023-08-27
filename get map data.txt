@@ -1,6 +1,6 @@
 var clean = "";
-for (var beat = 0; beat < Ot.beat.length; beat++) {
-  clean += (JSON.stringify([Ot.beat[beat][0],Ot.beat[beat][1]/2,Ot.beat[beat][5],Ot.beat[beat][6]/2]))
+for (var beat = 0; beat < zt.beat.length; beat++) {
+  clean += (JSON.stringify([zt.beat[beat][0],zt.beat[beat][1]/2,zt.beat[beat][5],zt.beat[beat][6]/2]))
   clean += "\n"
 }
 console.log(clean)
